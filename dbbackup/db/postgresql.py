@@ -16,7 +16,9 @@ class PgDumpConnector(BaseCommandDBConnector):
     def run_command(self, *args, **kwargs):
         if self.settings.get('PASSWORD'):
             env = kwargs.get('env', {})
-            env['PGPASSWORD'] = utils.get_escaped_command_arg(self.settings['PASSWORD'])
+            # env['PGPASSWORD'] = utils.get_escaped_command_arg(self.settings['PASSWORD'])
+            env['PGPASSWORD'] = self.settings['PASSWORD']
+
             kwargs['env'] = env
         return super(PgDumpConnector, self).run_command(*args, **kwargs)
 
@@ -53,7 +55,9 @@ class PgDumpConnector(BaseCommandDBConnector):
             cmd += ' --single-transaction'
         cmd += ' {}'.format(self.settings['NAME'])
         cmd = '{} {} {}'.format(self.restore_prefix, cmd, self.restore_suffix)
-        stdout, stderr = self.run_command(cmd, stdin=dump, env=self.restore_env)
+        stdout, stderr = self.run_command(cmd,
+                                          stdin=dump,
+                                          env=self.restore_env)
         return stdout, stderr
 
 
@@ -122,5 +126,7 @@ class PgDumpBinaryConnector(PgDumpConnector):
         if self.drop:
             cmd += ' --clean'
         cmd = '{} {} {}'.format(self.restore_prefix, cmd, self.restore_suffix)
-        stdout, stderr = self.run_command(cmd, stdin=dump, env=self.restore_env)
+        stdout, stderr = self.run_command(cmd,
+                                          stdin=dump,
+                                          env=self.restore_env)
         return stdout, stderr
